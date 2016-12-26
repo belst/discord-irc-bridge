@@ -51,11 +51,7 @@ fn main() {
     let _ = spawn(move || {
         let _ = listener.listen(|u| {
             if let Some(m) = u.message {
-                let name = if let Some(uname) = m.from.username {
-                    uname
-                } else {
-                    m.from.first_name
-                };
+                let name = m.from.username.unwrap_or(m.from.first_name);
 
                 match m.chat {
                     Chat::Group { id, .. } => {
@@ -84,7 +80,10 @@ fn main() {
             for msg in irc_server.iter() {
                 let msg = msg.unwrap();
                 println!("{}", msg);
-                if let Command::PRIVMSG(_, ref content) = msg.command {
+                if let Command::PRIVMSG(ref target, ref content) = msg.command {
+                    if target != "#kbot-dev" {
+                        continue;
+                    };
                     msg.source_nickname().map(|nick| {
                         let _ = tg_api.send_message(-139231621,
                                                     format!("<{}> {}", nick, content),
