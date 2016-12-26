@@ -1,0 +1,9 @@
+[package]
+name = "tg-irc-bridge"
+version = "0.1.0"
+authors = ["Joshua Rombauer <joshua.rombauer@tum.de>"]
+
+[dependencies]
+irc = "0.11"
+telegram-bot = "0.5"
+rustc-serialize = "0.3.22"
