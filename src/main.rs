@@ -31,6 +31,7 @@ struct Config {
     irc_config: irc::client::data::Config,
     tg_config: TgConfig,
     mapping: Mapping,
+    filterchars: String,
 }
 
 fn load<P: AsRef<Path>>(path: P) -> Result<Config> {
@@ -45,19 +46,23 @@ fn load<P: AsRef<Path>>(path: P) -> Result<Config> {
 
 
 fn main() {
+    println!("Starting bridge");
     let config = load("config.json").unwrap();
     let irc_config = config.irc_config;
     let tg_config = config.tg_config;
     let tg2irc = config.mapping.tg2irc;
     let irc2tg = config.mapping.irc2tg;
+    let filterchars = config.filterchars;
 
     let irc_server = IrcServer::from_config(irc_config).unwrap();
     irc_server.identify().unwrap();
 
     let tg_api = Api::from_token(&tg_config.api_token).unwrap();
-    println!("getMe: {:?}", tg_api.get_me());
     let mut listener = tg_api.listener(ListeningMethod::LongPoll(None));
 
+    println!("Bridge started.");
+
+    let filterchars_ = filterchars.clone();
     let iserver2 = irc_server.clone();
     let _ = spawn(move || {
         let _ = listener.listen(|u| {
@@ -73,7 +78,9 @@ fn main() {
                 if let Some(target) = tg2irc.get(&id) {
                     // for now only MessageType::Text is supported
                     if let MessageType::Text(msg) = m.msg {
-                        iserver2.send_privmsg(target, &format!("<{}> {}", name, msg))?;
+                        if filterchars_.chars().all(|c| !msg.starts_with(c)) {
+                            iserver2.send_privmsg(target, &format!("<{}> {}", name, msg))?;
+                        }
                     }
                 }
             }
@@ -86,8 +93,10 @@ fn main() {
     let _ = spawn(move || {
             for msg in irc_server.iter() {
                 let msg = msg.unwrap();
-                println!("{}", msg);
                 if let Command::PRIVMSG(ref target, ref content) = msg.command {
+                    if (&filterchars).chars().any(|c| content.starts_with(c)) {
+                        continue;
+                    }
                     if let Some(target) = irc2tg.get(target) {
                         msg.source_nickname().map(|nick| {
                             let _ = tg_api.send_message(*target,

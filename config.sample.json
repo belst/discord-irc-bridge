@@ -27,5 +27,6 @@
         "irc2tg": {
             "#kbot-dev": -139231621
         }
-    }
+    },
+    "filterchars": ".!"
 }
