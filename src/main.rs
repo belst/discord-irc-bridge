@@ -94,7 +94,7 @@ fn main() {
             for msg in irc_server.iter() {
                 let msg = msg.unwrap();
                 if let Command::PRIVMSG(ref target, ref content) = msg.command {
-                    if (&filterchars).chars().any(|c| content.starts_with(c)) {
+                    if filterchars.chars().any(|c| content.starts_with(c)) {
                         continue;
                     }
                     if let Some(target) = irc2tg.get(target) {
