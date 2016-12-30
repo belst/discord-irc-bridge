@@ -19,5 +19,13 @@
     },
     "tg_config": {
         "api_token": "TOKEN HERE"
+    },
+    "mapping": {
+        "tg2irc": {
+            "-139231621": "#kbot-dev"
+        },
+        "irc2tg": {
+            "#kbot-dev": -139231621
+        }
     }
 }

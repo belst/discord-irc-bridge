@@ -7,6 +7,7 @@ use std::io::prelude::*;
 use std::io::{Error, ErrorKind, Result};
 use std::path::Path;
 use std::thread::spawn;
+use std::collections::HashMap;
 
 
 use telegram_bot::*;
@@ -20,9 +21,16 @@ struct TgConfig {
 }
 
 #[derive(Clone, RustcDecodable, RustcEncodable, PartialEq, Debug)]
+struct Mapping {
+    tg2irc: HashMap<i64, String>,
+    irc2tg: HashMap<String, i64>,
+}
+
+#[derive(Clone, RustcDecodable, RustcEncodable, PartialEq, Debug)]
 struct Config {
     irc_config: irc::client::data::Config,
     tg_config: TgConfig,
+    mapping: Mapping,
 }
 
 fn load<P: AsRef<Path>>(path: P) -> Result<Config> {
@@ -40,6 +48,9 @@ fn main() {
     let config = load("config.json").unwrap();
     let irc_config = config.irc_config;
     let tg_config = config.tg_config;
+    let tg2irc = config.mapping.tg2irc;
+    let irc2tg = config.mapping.irc2tg;
+
     let irc_server = IrcServer::from_config(irc_config).unwrap();
     irc_server.identify().unwrap();
 
@@ -53,21 +64,17 @@ fn main() {
             if let Some(m) = u.message {
                 let name = m.from.username.unwrap_or(m.from.first_name);
 
-                match m.chat {
-                    Chat::Group { id, .. } => {
-                        if id != -139231621 {
-                            return Ok(ListeningAction::Continue);
-                        }
-                    }
-                    _ => return Ok(ListeningAction::Continue),
-                }
+                let id = match m.chat {
+                    Chat::Private { id, .. } => id,
+                    Chat::Group { id, .. } => id,
+                    Chat::Channel { id, .. } => id,
+                };
 
-                // Match message type
-                // cant send voice/video/images/sticker to irc
-                if let MessageType::Text(t) = m.msg {
-                    // Print received text message to stdout
-                    println!("<{}> {}", name, t);
-                    iserver2.send_privmsg("#kbot-dev", &format!("<{}> {}", name, t))?;
+                if let Some(target) = tg2irc.get(&id) {
+                    // for now only MessageType::Text is supported
+                    if let MessageType::Text(msg) = m.msg {
+                        iserver2.send_privmsg(target, &format!("<{}> {}", name, msg))?;
+                    }
                 }
             }
 
@@ -81,17 +88,16 @@ fn main() {
                 let msg = msg.unwrap();
                 println!("{}", msg);
                 if let Command::PRIVMSG(ref target, ref content) = msg.command {
-                    if target != "#kbot-dev" {
-                        continue;
-                    };
-                    msg.source_nickname().map(|nick| {
-                        let _ = tg_api.send_message(-139231621,
-                                                    format!("<{}> {}", nick, content),
-                                                    None,
-                                                    None,
-                                                    None,
-                                                    None);
-                    });
+                    if let Some(target) = irc2tg.get(target) {
+                        msg.source_nickname().map(|nick| {
+                            let _ = tg_api.send_message(*target,
+                                                        format!("<{}> {}", nick, content),
+                                                        None,
+                                                        None,
+                                                        None,
+                                                        None);
+                        });
+                    }
                 };
 
             }
