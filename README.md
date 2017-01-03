@@ -6,6 +6,8 @@ This programm sends messages between IRC Channels and Telegram Chats
 
 Configuration should be pretty straight forward.
 
+You can read all about the `irc_config` part [here](https://aatxe.github.io/irc/irc/client/data/config/struct.Config.html) (The Field parts is what u are probably most interested in.)
+
 You will need a Telegram API Token. You can read about how to get one [here](https://core.telegram.org/bots#botfather)
 
 The `mapping` section contains mappings in both directions.
