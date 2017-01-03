@@ -118,7 +118,7 @@ fn main() {
                     if let Some(target) = irc2discord.get(target) {
                         msg.source_nickname().map(|nick| {
                             if let Err(e) = discord_api.send_message(&ChannelId(*target),
-                                                                     &format!("*<{}>* {}",
+                                                                     &format!("**<{}>** {}",
                                                                               nick,
                                                                               content),
                                                                      "",
