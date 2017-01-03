@@ -1,9 +1,9 @@
 [package]
-name = "tg-irc-bridge"
+name = "discord-irc-bridge"
 version = "0.1.0"
-authors = ["Joshua Rombauer <joshua.rombauer@tum.de>"]
+authors = ["belst <irc@bel.st>"]
 
 [dependencies]
 irc = "0.11"
-telegram-bot = "0.5"
+discord = "0.7"
 rustc-serialize = "0.3.22"

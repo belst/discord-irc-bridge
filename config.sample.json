@@ -17,15 +17,15 @@
         "ping_timeout": 10,
         "options": {}
     },
-    "tg_config": {
+    "discord_config": {
         "api_token": "TOKEN HERE"
     },
     "mapping": {
-        "tg2irc": {
-            "-139231621": "#kbot-dev"
+        "discor2irc": {
+            "190819671354638336": "#kbot-dev"
         },
-        "irc2tg": {
-            "#kbot-dev": -139231621
+        "irc2discord": {
+            "#kbot-dev": 190819671354638336
         }
     },
     "filterchars": ".!"
