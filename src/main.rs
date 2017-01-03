@@ -91,7 +91,7 @@ fn main() {
                     }
                     if let Some(target) = discord2irc.get(&msg.channel_id.0) {
                         let attachments = if msg.attachments.len() > 0 {
-                            "[Attachements: ".to_string() +
+                            "[Attachments: ".to_string() +
                             &msg.attachments
                                 .into_iter()
                                 .map(|a| a.filename + " (" + &a.url + ")")
