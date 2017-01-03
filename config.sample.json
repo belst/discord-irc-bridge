@@ -1,7 +1,7 @@
 {
     "irc_config": {
         "owners": ["belst"],
-        "nickname": "tgbridgetest",
+        "nickname": "discordbridgetest",
         "alt_nicks": ["user_", "user__"],
         "username": "user",
         "realname": "Test User",
