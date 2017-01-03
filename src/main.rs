@@ -90,11 +90,22 @@ fn main() {
                         continue;
                     }
                     if let Some(target) = discord2irc.get(&msg.channel_id.0) {
+                        let attachments = if msg.attachments.len() > 0 {
+                            "[Attachements: ".to_string() +
+                            &msg.attachments
+                                .into_iter()
+                                .map(|a| a.filename + " (" + &a.url + ")")
+                                .collect::<Vec<_>>()
+                                .join(", ") + "]"
+                        } else {
+                            "".into()
+                        };
                         match iserver2.send_privmsg(target,
-                                                    &format!("<\x03{}{}\x03> {}",
+                                                    &format!("<\x03{}{}\x03> {} {}",
                                                              colorize(&msg.author.name),
                                                              msg.author.name,
-                                                             msg.content)) {
+                                                             msg.content,
+                                                             attachments)) {
                             Ok(_) => continue,
                             Err(e) => println!("Error writing to irc: {:?}", e),
                         }
