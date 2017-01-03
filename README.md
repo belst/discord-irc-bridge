@@ -13,7 +13,7 @@ You can read all about the `irc_config` part [here](https://aatxe.github.io/irc/
 You will need a Discord Bot Token. You can generate one [here](https://discordapp.com/developers/applications/me)
 
 The `mapping` section contains mappings in both directions.
-Use `discord2irc` to send messages from Telegram to IRC and `irc2discord` to send from IRC to Telegram.
+Use `discord2irc` to send messages from Discord to IRC and `irc2discord` to send from IRC to Discord.
 
 You can get the chat ID in discord by going to `settings->appearance` and selecting the `Developer Mode`  
 You can now just rightclick a channel and copy the id.`
