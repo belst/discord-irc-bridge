@@ -4,7 +4,9 @@ This programm sends messages between IRC Channels and Telegram Chats
 
 ## Configuration
 
-Configuration should be pretty straight forward.
+Configuration should be pretty straight forward. Just check the [Sample configuration](config.sample.json).
+
+Rename it to `config.json` after you are done configuring.
 
 You can read all about the `irc_config` part [here](https://aatxe.github.io/irc/irc/client/data/config/struct.Config.html) (The Field parts is what u are probably most interested in.)
 
