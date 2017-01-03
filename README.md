@@ -17,7 +17,8 @@ This is a bit tricky, since there is no option other than to use the api directl
 
 1. go to: https://api.telegram.org/bot&lt;token&gt;/getUpdates (replace `<token>` with the bot token you got before)
 2. in the result you will get an array of messages (if there are any new messages, better write a few times in the chat where the bot is):
-```json
+
+```js
 {
     "ok": true,
     "result": [
