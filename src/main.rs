@@ -8,7 +8,8 @@ use std::io::{Error, ErrorKind, Result};
 use std::path::Path;
 use std::thread::spawn;
 use std::collections::HashMap;
-
+use std::hash::{Hash, Hasher};
+use std::collections::hash_map::DefaultHasher;
 
 use telegram_bot::*;
 use irc::client::prelude::*;
@@ -34,6 +35,7 @@ struct Config {
     filterchars: String,
 }
 
+/// Loads a Config and parses it into a Config struct
 fn load<P: AsRef<Path>>(path: P) -> Result<Config> {
     let mut file = File::open(path)?;
     let mut data = String::new();
@@ -42,6 +44,17 @@ fn load<P: AsRef<Path>>(path: P) -> Result<Config> {
         Error::new(ErrorKind::InvalidInput,
                    "Failed to decode configuration file.")
     })
+}
+
+/// Hashes the given value
+fn hash<T: Hash>(t: &T) -> u64 {
+    let mut h = DefaultHasher::new();
+    t.hash(&mut h);
+    h.finish()
+}
+
+fn colorize(s: &str) -> u64 {
+    hash(&s) % 16
 }
 
 
@@ -79,7 +92,11 @@ fn main() {
                     // for now only MessageType::Text is supported
                     if let MessageType::Text(msg) = m.msg {
                         if filterchars_.chars().all(|c| !msg.starts_with(c)) {
-                            iserver2.send_privmsg(target, &format!("<{}> {}", name, msg))?;
+                            iserver2.send_privmsg(target,
+                                              &format!("<\x03{}{}\x03> {}",
+                                                       colorize(&name),
+                                                       name,
+                                                       msg))?;
                         }
                     }
                 }
@@ -90,26 +107,29 @@ fn main() {
         });
     });
 
-    let _ = spawn(move || {
-            for msg in irc_server.iter() {
-                let msg = msg.unwrap();
-                if let Command::PRIVMSG(ref target, ref content) = msg.command {
-                    if filterchars.chars().any(|c| content.starts_with(c)) {
-                        continue;
-                    }
-                    if let Some(target) = irc2tg.get(target) {
-                        msg.source_nickname().map(|nick| {
-                            let _ = tg_api.send_message(*target,
-                                                        format!("<{}> {}", nick, content),
-                                                        None,
-                                                        None,
-                                                        None,
-                                                        None);
-                        });
-                    }
-                };
+    let _ =
+        spawn(move || {
+                for msg in irc_server.iter() {
+                    let msg = msg.unwrap();
+                    if let Command::PRIVMSG(ref target, ref content) = msg.command {
+                        if filterchars.chars().any(|c| content.starts_with(c)) {
+                            continue;
+                        }
+                        if let Some(target) = irc2tg.get(target) {
+                            msg.source_nickname().map(|nick| {
+                                if let Err(e) = tg_api.send_message(*target,
+                                                  format!("*<{}>* {}", nick, content),
+                                                  Some(types::ParseMode::Markdown),
+                                                  None,
+                                                  None,
+                                                  None) {
+                                    println!("{:?}", e);
+                                }
+                            });
+                        }
+                    };
 
-            }
-        })
-        .join();
+                }
+            })
+            .join();
 }
