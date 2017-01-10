@@ -79,7 +79,7 @@ fn main() {
     let filterchars_ = filterchars.clone();
     let iserver2 = irc_server.clone();
 
-    let _ = spawn(move || {
+    let discord = spawn(move || {
         loop {
             match listener.recv_event() {
                 Ok(Event::MessageCreate(msg)) => {
@@ -100,14 +100,24 @@ fn main() {
                         } else {
                             "".into()
                         };
-                        match iserver2.send_privmsg(target,
-                                                    &format!("<\x03{}{}\x03> {} {}",
-                                                             colorize(&msg.author.name),
-                                                             msg.author.name,
-                                                             msg.content,
-                                                             attachments)) {
-                            Ok(_) => continue,
-                            Err(e) => println!("Error writing to irc: {:?}", e),
+                        let mut c = msg.content;
+                        for u in msg.mentions.iter() {
+                            c = c.replace(&format!("<@{}>", u.id), &format!("@{}", u.name));
+                        }
+                        //for r in msg.mention_roles.iter() {
+                        //    c = c.replace(&format!("<@&{}>", r, &format!("@RoleNameHere??"));
+                        //}
+
+                        for line in c.lines() {
+                            match iserver2.send_privmsg(target,
+                                                        &format!("<\x03{}{}\x03> {} {}",
+                                                                 colorize(&msg.author.name),
+                                                                 msg.author.name,
+                                                                 line,
+                                                                 attachments)) {
+                                Ok(_) => continue,
+                                Err(e) => println!("Error writing to irc: {:?}", e),
+                            }
                         }
                     }
 
@@ -119,28 +129,32 @@ fn main() {
     });
 
 
-    let _ = spawn(move || {
-            for msg in irc_server.iter() {
-                let msg = msg.unwrap();
-                if let Command::PRIVMSG(ref target, ref content) = msg.command {
-                    if filterchars.chars().any(|c| content.starts_with(c)) {
-                        continue;
-                    }
-                    if let Some(target) = irc2discord.get(target) {
-                        msg.source_nickname().map(|nick| {
-                            if let Err(e) = discord_api.send_message(&ChannelId(*target),
-                                                                     &format!("**<{}>** {}",
-                                                                              nick,
-                                                                              content),
-                                                                     "",
-                                                                     false) {
-                                println!("{:?}", e);
-                            }
-                        });
-                    }
-                };
+    spawn(move || {
+        for msg in irc_server.iter() {
+            let msg = msg.unwrap();
+            if let Command::PRIVMSG(ref target, ref content) = msg.command {
+                if filterchars.chars().any(|c| content.starts_with(c)) {
+                    continue;
+                }
+                if let Some(target) = irc2discord.get(target) {
+                    msg.source_nickname().map(|nick| {
+                        if let Err(e) = discord_api.send_message(ChannelId(*target),
+                                                                 &format!("**<{}>** {}",
+                                                                          nick,
+                                                                          content),
+                                                                 "",
+                                                                 false) {
+                            println!("{:?}", e);
+                        }
+                    });
+                }
+            };
 
-            }
-        })
-        .join();
+        }
+    })
+    .join()
+    .unwrap_or_else(|e| println!("IRC Thread errored with: {:?}", e));
+    println!("IRC Thread died.");
+    discord.join().unwrap_or_else(|e| println!("Discord Thread errored with: {:?}", e));
+    println!("Discord Thread died.");
 }

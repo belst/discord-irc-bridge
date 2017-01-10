@@ -2,7 +2,7 @@
 name = "discord-irc-bridge"
 version = "0.1.0"
 dependencies = [
- "discord 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "discord 0.7.1 (git+https://github.com/belst/discord-rs.git?rev=a9f4032)",
  "irc 0.11.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-serialize 0.3.22 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -40,8 +40,8 @@ dependencies = [
 
 [[package]]
 name = "discord"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+version = "0.7.1"
+source = "git+https://github.com/belst/discord-rs.git?rev=a9f4032#a9f4032a83ce0310b5ee001bdb8db4c3318d078d"
 dependencies = [
  "base64-rs 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "bitflags 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -558,7 +558,7 @@ dependencies = [
 "checksum byteorder 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)" = "0fc10e8cc6b2580fda3f36eb6dc5316657f812a3df879a44a66fc9f0fdbc4855"
 "checksum cfg-if 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "de1e760d7b6535af4241fca8bd8adf68e2e7edacc6b29f5d399050c5e48cf88c"
 "checksum cookie 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)" = "0e3d6405328b6edb412158b3b7710e2634e23f3614b9bb1c412df7952489a626"
-"checksum discord 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d054d03ea3f6b90295720c15ee5e93a9c7ad7771b6b02e434cc7ba3a940fc908"
+"checksum discord 0.7.1 (git+https://github.com/belst/discord-rs.git?rev=a9f4032)" = "<none>"
 "checksum dtoa 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "0dd841b58510c9618291ffa448da2e4e0f699d984d436122372f446dae62263d"
 "checksum encoding 0.2.33 (registry+https://github.com/rust-lang/crates.io-index)" = "6b0d943856b990d12d3b55b359144ff341533e516d94098b1d3fc1ac666d36ec"
 "checksum encoding-index-japanese 1.20141219.5 (registry+https://github.com/rust-lang/crates.io-index)" = "04e8b2ff42e9a05335dbf8b5c6f7567e5591d0d916ccef4e0b1710d32a0d0c91"
