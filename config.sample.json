@@ -1,0 +1,32 @@
+{
+    "irc_config": {
+        "owners": ["belst"],
+        "nickname": "discordbridgetest",
+        "alt_nicks": ["user_", "user__"],
+        "username": "user",
+        "realname": "Test User",
+        "server": "irc.n0xy.net",
+        "port": 6697,
+        "password": "",
+        "use_ssl": true,
+        "encoding": "UTF-8",
+        "channels": ["#kbot-dev"],
+        "umodes": "+RB-x",
+        "user_info": "I'm a test user for the Rust IRC crate.",
+        "ping_time": 180,
+        "ping_timeout": 10,
+        "options": {}
+    },
+    "discord_config": {
+        "api_token": "TOKEN HERE"
+    },
+    "mapping": {
+        "discor2irc": {
+            "190819671354638336": "#kbot-dev"
+        },
+        "irc2discord": {
+            "#kbot-dev": 190819671354638336
+        }
+    },
+    "filterchars": ".!"
+}
