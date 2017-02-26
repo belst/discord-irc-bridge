@@ -18,10 +18,10 @@
         "options": {}
     },
     "discord_config": {
-        "api_token": "TOKEN HERE"
+        "bot_token": "TOKEN HERE"
     },
     "mapping": {
-        "discor2irc": {
+        "discord2irc": {
             "190819671354638336": "#kbot-dev"
         },
         "irc2discord": {
