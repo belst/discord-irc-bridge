@@ -64,7 +64,7 @@ fn colorize(s: &str) -> u64 {
 
 fn remove_formatting<'t>(s: &'t str) -> std::borrow::Cow<'t, str> {
     lazy_static! {
-        static ref RE: Regex = Regex::new("\x03\\d+(?:,\\d+?)?|\x16|\x02|\x1D|\x1F|\x0F").unwrap();
+        static ref RE: Regex = Regex::new("[\x02\x1F\x0F\x16]|\x03(\\d\\d?(,\\d\\d?)?)?").unwrap();
     }
     RE.replace_all(s, "")
 }
