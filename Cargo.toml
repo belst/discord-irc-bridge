@@ -6,9 +6,9 @@ authors = ["belst <irc@bel.st>"]
 [dependencies]
 irc = "0.11"
 rustc-serialize = "0.3.22"
+regex = "0.2"
+lazy_static = "0.2"
 
 [dependencies.discord]
 version = "0.7"
 default-features = false
-git = "https://github.com/belst/discord-rs.git"
-rev = "a9f4032"

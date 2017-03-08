@@ -1,6 +1,9 @@
 extern crate irc;
 extern crate rustc_serialize;
 extern crate discord;
+extern crate regex;
+#[macro_use]
+extern crate lazy_static;
 
 use std::fs::File;
 use std::io::prelude::*;
@@ -15,6 +18,7 @@ use discord::Discord;
 use discord::model::{Event, ChannelId};
 use irc::client::prelude::*;
 use rustc_serialize::json::decode;
+use regex::Regex;
 
 
 #[derive(Clone, RustcDecodable, RustcEncodable, PartialEq, Debug)]
@@ -56,6 +60,13 @@ fn hash<T: Hash>(t: &T) -> u64 {
 
 fn colorize(s: &str) -> u64 {
     hash(&s) % 16
+}
+
+fn remove_formatting<'t>(s: &'t str) -> std::borrow::Cow<'t, str> {
+    lazy_static! {
+        static ref RE: Regex = Regex::new("\x03\\d+(?:,\\d+?)?|\x16|\x02|\x1D|\x1F|\x0F").unwrap();
+    }
+    RE.replace_all(s, "")
 }
 
 
@@ -130,30 +141,30 @@ fn main() {
 
 
     spawn(move || {
-        for msg in irc_server.iter() {
-            let msg = msg.unwrap();
-            if let Command::PRIVMSG(ref target, ref content) = msg.command {
-                if filterchars.chars().any(|c| content.starts_with(c)) {
-                    continue;
-                }
-                if let Some(target) = irc2discord.get(target) {
-                    msg.source_nickname().map(|nick| {
-                        if let Err(e) = discord_api.send_message(ChannelId(*target),
-                                                                 &format!("**<{}>** {}",
+            for msg in irc_server.iter() {
+                let msg = msg.unwrap();
+                if let Command::PRIVMSG(ref target, ref content) = msg.command {
+                    if filterchars.chars().any(|c| content.starts_with(c)) {
+                        continue;
+                    }
+                    if let Some(target) = irc2discord.get(target) {
+                        msg.source_nickname().map(|nick| {
+                            if let Err(e) = discord_api.send_message(&ChannelId(*target),
+                                                                     &format!("**<{}>** {}",
                                                                           nick,
-                                                                          content),
-                                                                 "",
-                                                                 false) {
-                            println!("{:?}", e);
-                        }
-                    });
-                }
-            };
+                                                                          remove_formatting(content)),
+                                                                     "",
+                                                                     false) {
+                                println!("{:?}", e);
+                            }
+                        });
+                    }
+                };
 
-        }
-    })
-    .join()
-    .unwrap_or_else(|e| println!("IRC Thread errored with: {:?}", e));
+            }
+        })
+        .join()
+        .unwrap_or_else(|e| println!("IRC Thread errored with: {:?}", e));
     println!("IRC Thread died.");
     discord.join().unwrap_or_else(|e| println!("Discord Thread errored with: {:?}", e));
     println!("Discord Thread died.");
